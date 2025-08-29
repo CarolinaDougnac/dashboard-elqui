@@ -6,50 +6,53 @@
   <title>Dashboard Estaciones — Precipitación</title>
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
   <style>
-    :root {
-      --border:#e5e7eb;
-      --muted:#6b7280;
-    }
+    :root { --border:#e5e7eb; --muted:#6b7280; }
     body { margin:0; font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; color:#111827; }
-    #app { display: grid; grid-template-columns: 1.2fr 0.8fr; height: 100vh; }
-    #map { width: 100%; height: 100%; }
-    #panel { padding: 16px; overflow: auto; border-left: 1px solid var(--border); }
-    h1 { font-size: 18px; margin: 0 0 8px; }
-    .muted { color: var(--muted); font-size: 12px; }
-    .meta { margin: 8px 0 12px; line-height: 1.4; }
+    #app { display:grid; grid-template-columns: 1.2fr 0.8fr; height:100vh; }
+    #map { width:100%; height:100%; }
+    #panel { padding:16px; overflow:auto; border-left:1px solid var(--border); display:flex; flex-direction:column; gap:12px; }
+    h1 { font-size:18px; margin:0; }
+    .muted { color:var(--muted); font-size:12px; }
+    .meta { line-height:1.4; }
     .chip { display:inline-block; padding:2px 8px; border-radius:999px; background:#f3f4f6; margin-right:6px; font-size:12px; }
-    .src { font-size:12px; margin-top: 8px; }
-    .src a { color:#2563eb; text-decoration:none; }
-    .card { border:1px solid var(--border); border-radius:12px; padding:12px; margin-top:12px; }
+    .src, .credit { font-size:12px; }
+    .card { border:1px solid var(--border); border-radius:12px; padding:12px; }
     .card h2 { font-size:14px; margin:0 0 6px; }
     canvas { max-width: 100%; }
-    @media (max-width: 900px) {
-      #app { grid-template-columns: 1fr; grid-template-rows: 52vh 48vh; }
-      #panel { border-left: none; border-top: 1px solid var(--border); }
-    }
+    footer { margin-top:auto; padding-top:8px; border-top:1px solid var(--border); display:flex; flex-direction:column; gap:4px; }
+    @media (max-width:900px) { #app { grid-template-columns:1fr; grid-template-rows:52vh 48vh; } #panel { border-left:none; border-top:1px solid var(--border); } }
   </style>
 </head>
 <body>
 <div id="app">
   <div id="map"></div>
   <div id="panel">
-    <h1>Estaciones — resumen mensual</h1>
-    <div class="muted">Haz clic en una estación para ver sus promedios mensuales.</div>
-    <div id="est-meta" class="meta muted">Sin estación seleccionada.</div>
-    <div class="src">Origen de datos: <a href="https://www.cr2.cl/datos-de-precipitacion/" target="_blank" rel="noopener">CR2 — Datos de precipitación</a></div>
+    <div>
+      <h1>Estaciones — resumen mensual</h1>
+      <div class="muted">Haz clic en una estación para ver sus promedios y distribución mensual.</div>
+      <div id="est-meta" class="meta muted">Sin estación seleccionada.</div>
+      <div class="src">Origen de datos: <a href="https://www.cr2.cl/datos-de-precipitacion/" target="_blank" rel="noopener">CR2 — Datos de precipitación</a></div>
+    </div>
 
     <div class="card">
       <h2>Precipitación media mensual (mm)</h2>
       <canvas id="chart-prcp" height="200"></canvas>
     </div>
+
     <div class="card">
       <h2>Promedio mensual de <em>días con lluvia</em> (días)</h2>
       <canvas id="chart-dias" height="200"></canvas>
     </div>
+
     <div class="card">
-      <h2>Promedio mensual de <em>eventos de lluvia</em> (eventos)</h2>
-      <canvas id="chart-eventos" height="200"></canvas>
+      <h2>Distribución mensual de <em>días con lluvia</em> — Boxplot</h2>
+      <canvas id="chart-box" height="220"></canvas>
+      <div class="muted">Cada caja resume la distribución histórica por mes (mín, Q1, mediana, Q3, máx).</div>
     </div>
+
+    <footer>
+      <div class="credit">Dashboard elaborado por <b>Carolina Dougnac V.</b> — 2025</div>
+    </footer>
   </div>
 </div>
 
@@ -72,7 +75,9 @@
         "Nombre": "Fundo San Antonio",
         "Elev_m": 260,
         "Cuenca": "Rio Elqui",
-        "Subcuenca": "R. Elqui Bajo"
+        "Subcuenca": "R. Elqui Bajo",
+        "Inicio": "1961-11-01",
+        "Fin": "1963-12-31"
       }
     },
     {
@@ -89,7 +94,9 @@
         "Nombre": "Huanta",
         "Elev_m": 1240,
         "Cuenca": "Rio Elqui",
-        "Subcuenca": "Rio Turbio"
+        "Subcuenca": "Rio Turbio",
+        "Inicio": "1989-04-01",
+        "Fin": "2019-09-30"
       }
     },
     {
@@ -106,7 +113,9 @@
         "Nombre": "Rio Turbio En Varillar",
         "Elev_m": 890,
         "Cuenca": "Rio Elqui",
-        "Subcuenca": "Rio Turbio"
+        "Subcuenca": "Rio Turbio",
+        "Inicio": "2014-11-01",
+        "Fin": "2019-12-31"
       }
     },
     {
@@ -123,7 +132,9 @@
         "Nombre": "Molino Yaco",
         "Elev_m": 1550,
         "Cuenca": "Rio Elqui",
-        "Subcuenca": "R. Elqui Bajo"
+        "Subcuenca": "R. Elqui Bajo",
+        "Inicio": "1958-09-01",
+        "Fin": "1965-12-31"
       }
     },
     {
@@ -140,7 +151,9 @@
         "Nombre": "Rio Toro Antes Junta Rio La Laguna",
         "Elev_m": 2165,
         "Cuenca": "Rio Elqui",
-        "Subcuenca": "Rio Turbio"
+        "Subcuenca": "Rio Turbio",
+        "Inicio": "2014-11-01",
+        "Fin": "2019-12-02"
       }
     },
     {
@@ -157,7 +170,9 @@
         "Nombre": "Juntas",
         "Elev_m": 2150,
         "Cuenca": "Rio Elqui",
-        "Subcuenca": "Rio Turbio"
+        "Subcuenca": "Rio Turbio",
+        "Inicio": "1990-01-01",
+        "Fin": "2018-11-30"
       }
     },
     {
@@ -174,7 +189,9 @@
         "Nombre": "Rivadavia",
         "Elev_m": 820,
         "Cuenca": "Rio Elqui",
-        "Subcuenca": "Rio Turbio"
+        "Subcuenca": "Rio Turbio",
+        "Inicio": "1937-01-01",
+        "Fin": "2019-09-30"
       }
     },
     {
@@ -191,7 +208,9 @@
         "Nombre": "Rio Claro En Rivadavia",
         "Elev_m": 820,
         "Cuenca": "Rio Elqui",
-        "Subcuenca": "Rio Claro"
+        "Subcuenca": "Rio Claro",
+        "Inicio": "2015-04-01",
+        "Fin": "2019-12-31"
       }
     },
     {
@@ -208,7 +227,9 @@
         "Nombre": "Rio Elqui En Algarrobal",
         "Elev_m": 760,
         "Cuenca": "Rio Elqui",
-        "Subcuenca": "R. Elqui Medio"
+        "Subcuenca": "R. Elqui Medio",
+        "Inicio": "2011-01-01",
+        "Fin": "2019-12-31"
       }
     },
     {
@@ -225,7 +246,9 @@
         "Nombre": "Puclaro Embalse",
         "Elev_m": 460,
         "Cuenca": "Rio Elqui",
-        "Subcuenca": "R. Elqui Medio"
+        "Subcuenca": "R. Elqui Medio",
+        "Inicio": "1962-08-01",
+        "Fin": "1966-12-31"
       }
     },
     {
@@ -242,7 +265,9 @@
         "Nombre": "Vicua (Inia)",
         "Elev_m": 730,
         "Cuenca": "Rio Elqui",
-        "Subcuenca": "R. Elqui Medio"
+        "Subcuenca": "R. Elqui Medio",
+        "Inicio": "1971-01-01",
+        "Fin": "2019-09-30"
       }
     },
     {
@@ -259,7 +284,9 @@
         "Nombre": "Monte Grande",
         "Elev_m": 1120,
         "Cuenca": "Rio Elqui",
-        "Subcuenca": "Rio Claro"
+        "Subcuenca": "Rio Claro",
+        "Inicio": "1958-09-01",
+        "Fin": "2019-09-30"
       }
     },
     {
@@ -276,7 +303,9 @@
         "Nombre": "Pisco Elqui Dmc",
         "Elev_m": 1250,
         "Cuenca": "Rio Elqui",
-        "Subcuenca": "Rio Claro"
+        "Subcuenca": "Rio Claro",
+        "Inicio": "1977-01-01",
+        "Fin": "2019-09-30"
       }
     },
     {
@@ -293,7 +322,9 @@
         "Nombre": "Cochiguaz",
         "Elev_m": 1560,
         "Cuenca": "Rio Elqui",
-        "Subcuenca": "Rio Claro"
+        "Subcuenca": "Rio Claro",
+        "Inicio": "1989-04-01",
+        "Fin": "2019-09-30"
       }
     },
     {
@@ -310,7 +341,9 @@
         "Nombre": "Los Nichos",
         "Elev_m": 1330,
         "Cuenca": "Rio Elqui",
-        "Subcuenca": "Rio Claro"
+        "Subcuenca": "Rio Claro",
+        "Inicio": "1977-01-01",
+        "Fin": "2019-09-30"
       }
     },
     {
@@ -327,7 +360,9 @@
         "Nombre": "La Ortiga",
         "Elev_m": 1560,
         "Cuenca": "Rio Elqui",
-        "Subcuenca": "Rio Claro"
+        "Subcuenca": "Rio Claro",
+        "Inicio": "1979-01-01",
+        "Fin": "2019-07-31"
       }
     },
     {
@@ -344,7 +379,9 @@
         "Nombre": "La Laguna Embalse",
         "Elev_m": 3160,
         "Cuenca": "Rio Elqui",
-        "Subcuenca": "Rio Turbio"
+        "Subcuenca": "Rio Turbio",
+        "Inicio": "1964-01-01",
+        "Fin": "2019-09-30"
       }
     },
     {
@@ -361,7 +398,9 @@
         "Nombre": "Hurtado",
         "Elev_m": 1100,
         "Cuenca": "Rio Limari",
-        "Subcuenca": "Rio Hurtado"
+        "Subcuenca": "Rio Hurtado",
+        "Inicio": "1943-01-01",
+        "Fin": "2019-09-30"
       }
     }
   ]
@@ -373,28 +412,26 @@
 <script id="series-dias" type="application/json">
 {"4301005": {"labels": ["1", "10", "11", "12", "2", "3", "4", "5", "6", "7", "8", "9"], "values": [0.585, 0.42, 0.148, 0.284, 0.451, 0.512, 0.667, 1.309, 1.889, 1.938, 1.321, 0.556]}, "4302001": {"labels": ["1", "10", "11", "12", "2", "3", "4", "5", "6", "7", "8", "9"], "values": [0.0, 0.049, 0.012, 0.012, 0.012, 0.024, 0.062, 0.148, 0.123, 0.062, 0.123, 0.025]}, "4302014": {"labels": ["1", "10", "11", "12", "2", "3", "4", "5", "6", "7", "8", "9"], "values": [0.085, 0.099, 0.037, 0.074, 0.085, 0.171, 0.222, 0.556, 0.753, 0.605, 0.346, 0.173]}, "4306002": {"labels": ["1", "10", "11", "12", "2", "3", "4", "5", "6", "7", "8", "9"], "values": [0.037, 0.136, 0.025, 0.025, 0.037, 0.085, 0.259, 0.395, 0.519, 0.667, 0.407, 0.173]}, "4308001": {"labels": ["1", "10", "11", "12", "2", "3", "4", "5", "6", "7", "8", "9"], "values": [0.012, 0.049, 0.0, 0.037, 0.012, 0.012, 0.012, 0.012, 0.012, 0.062, 0.086, 0.012]}, "4308003": {"labels": ["1", "10", "11", "12", "2", "3", "4", "5", "6", "7", "8", "9"], "values": [0.024, 0.272, 0.099, 0.049, 0.061, 0.244, 0.432, 1.062, 1.741, 1.864, 1.568, 0.679]}, "4311003": {"labels": ["1", "10", "11", "12", "2", "3", "4", "5", "6", "7", "8", "9"], "values": [0.0, 0.136, 0.025, 0.0, 0.049, 0.11, 0.284, 0.654, 0.84, 1.074, 0.654, 0.16]}, "4311004": {"labels": ["1", "10", "11", "12", "2", "3", "4", "5", "6", "7", "8", "9"], "values": [0.012, 0.136, 0.025, 0.0, 0.049, 0.134, 0.235, 0.63, 0.864, 1.086, 0.716, 0.21]}, "4311005": {"labels": ["1", "10", "11", "12", "2", "3", "4", "5", "6", "7", "8", "9"], "values": [0.024, 0.148, 0.012, 0.012, 0.024, 0.146, 0.272, 0.728, 0.951, 1.123, 0.827, 0.222]}, "4313003": {"labels": ["1", "10", "11", "12", "2", "3", "4", "5", "6", "7", "8", "9"], "values": [0.0, 0.049, 0.049, 0.025, 0.0, 0.171, 0.272, 0.617, 0.741, 0.617, 0.556, 0.185]}, "4314002": {"labels": ["1", "10", "11", "12", "2", "3", "4", "5", "6", "7", "8", "9"], "values": [0.0, 0.049, 0.0, 0.025, 0.0, 0.0, 0.037, 0.086, 0.049, 0.025, 0.025, 0.025]}, "4314003": {"labels": ["1", "10", "11", "12", "2", "3", "4", "5", "6", "7", "8", "9"], "values": [0.0, 0.136, 0.037, 0.0, 0.024, 0.134, 0.259, 0.704, 1.21, 1.247, 0.802, 0.296]}, "4320001": {"labels": ["1", "10", "11", "12", "2", "3", "4", "5", "6", "7", "8", "9"], "values": [0.037, 0.074, 0.012, 0.025, 0.0, 0.049, 0.086, 0.185, 0.247, 0.148, 0.21, 0.049]}, "4320003": {"labels": ["1", "10", "11", "12", "2", "3", "4", "5", "6", "7", "8", "9"], "values": [0.024, 0.222, 0.049, 0.025, 0.024, 0.159, 0.259, 0.704, 0.951, 1.198, 1.037, 0.444]}, "4321001": {"labels": ["1", "10", "11", "12", "2", "3", "4", "5", "6", "7", "8", "9"], "values": [0.0, 0.012, 0.012, 0.0, 0.0, 0.0, 0.025, 0.025, 0.099, 0.111, 0.136, 0.099]}, "4331004": {"labels": ["1", "10", "11", "12", "2", "3", "4", "5", "6", "7", "8", "9"], "values": [0.024, 0.074, 0.0, 0.0, 0.049, 0.037, 0.025, 0.037, 0.136, 0.173, 0.185, 0.062]}, "4334001": {"labels": ["1", "10", "11", "12", "2", "3", "4", "5", "6", "7", "8", "9"], "values": [0.0, 0.012, 0.0, 0.0, 0.0, 0.0, 0.0, 0.012, 0.025, 0.012, 0.0, 0.0]}, "4502005": {"labels": ["1", "10", "11", "12", "2", "3", "4", "5", "6", "7", "8", "9"], "values": [0.049, 0.321, 0.16, 0.062, 0.085, 0.183, 0.469, 1.173, 1.926, 1.914, 1.444, 0.63]}}
 </script>
-<script id="series-eventos" type="application/json">
-{"4301005": {"labels": ["1", "10", "11", "12", "2", "3", "4", "5", "6", "7", "8", "9"], "values": [0.39, 0.309, 0.136, 0.21, 0.28, 0.39, 0.481, 0.852, 1.222, 1.173, 0.778, 0.432]}, "4302001": {"labels": ["1", "10", "11", "12", "2", "3", "4", "5", "6", "7", "8", "9"], "values": [0.0, 0.025, 0.012, 0.012, 0.012, 0.024, 0.037, 0.099, 0.025, 0.037, 0.049, 0.012]}, "4302014": {"labels": ["1", "10", "11", "12", "2", "3", "4", "5", "6", "7", "8", "9"], "values": [0.049, 0.074, 0.037, 0.037, 0.061, 0.11, 0.16, 0.358, 0.457, 0.37, 0.222, 0.123]}, "4306002": {"labels": ["1", "10", "11", "12", "2", "3", "4", "5", "6", "7", "8", "9"], "values": [0.024, 0.099, 0.025, 0.025, 0.012, 0.061, 0.198, 0.309, 0.37, 0.481, 0.21, 0.123]}, "4308001": {"labels": ["1", "10", "11", "12", "2", "3", "4", "5", "6", "7", "8", "9"], "values": [0.012, 0.025, 0.0, 0.025, 0.012, 0.012, 0.012, 0.012, 0.012, 0.037, 0.037, 0.012]}, "4308003": {"labels": ["1", "10", "11", "12", "2", "3", "4", "5", "6", "7", "8", "9"], "values": [0.024, 0.247, 0.074, 0.049, 0.049, 0.207, 0.284, 0.765, 1.148, 1.198, 1.037, 0.494]}, "4311003": {"labels": ["1", "10", "11", "12", "2", "3", "4", "5", "6", "7", "8", "9"], "values": [0.0, 0.099, 0.025, 0.0, 0.037, 0.073, 0.198, 0.494, 0.593, 0.679, 0.395, 0.136]}, "4311004": {"labels": ["1", "10", "11", "12", "2", "3", "4", "5", "6", "7", "8", "9"], "values": [0.012, 0.111, 0.025, 0.0, 0.049, 0.085, 0.185, 0.494, 0.63, 0.728, 0.457, 0.148]}, "4311005": {"labels": ["1", "10", "11", "12", "2", "3", "4", "5", "6", "7", "8", "9"], "values": [0.024, 0.123, 0.012, 0.012, 0.024, 0.11, 0.222, 0.519, 0.617, 0.704, 0.481, 0.173]}, "4313003": {"labels": ["1", "10", "11", "12", "2", "3", "4", "5", "6", "7", "8", "9"], "values": [0.0, 0.049, 0.049, 0.012, 0.0, 0.122, 0.185, 0.42, 0.42, 0.481, 0.37, 0.16]}, "4314002": {"labels": ["1", "10", "11", "12", "2", "3", "4", "5", "6", "7", "8", "9"], "values": [0.0, 0.025, 0.0, 0.012, 0.0, 0.0, 0.037, 0.049, 0.037, 0.012, 0.012, 0.025]}, "4314003": {"labels": ["1", "10", "11", "12", "2", "3", "4", "5", "6", "7", "8", "9"], "values": [0.0, 0.123, 0.037, 0.0, 0.024, 0.085, 0.173, 0.58, 0.864, 0.753, 0.444, 0.235]}, "4320001": {"labels": ["1", "10", "11", "12", "2", "3", "4", "5", "6", "7", "8", "9"], "values": [0.024, 0.049, 0.012, 0.012, 0.0, 0.024, 0.062, 0.123, 0.123, 0.099, 0.111, 0.049]}, "4320003": {"labels": ["1", "10", "11", "12", "2", "3", "4", "5", "6", "7", "8", "9"], "values": [0.024, 0.185, 0.037, 0.025, 0.024, 0.122, 0.185, 0.494, 0.679, 0.765, 0.605, 0.346]}, "4321001": {"labels": ["1", "10", "11", "12", "2", "3", "4", "5", "6", "7", "8", "9"], "values": [0.0, 0.012, 0.012, 0.0, 0.0, 0.0, 0.025, 0.025, 0.086, 0.074, 0.123, 0.037]}, "4331004": {"labels": ["1", "10", "11", "12", "2", "3", "4", "5", "6", "7", "8", "9"], "values": [0.012, 0.037, 0.0, 0.0, 0.049, 0.037, 0.025, 0.037, 0.099, 0.099, 0.111, 0.049]}, "4334001": {"labels": ["1", "10", "11", "12", "2", "3", "4", "5", "6", "7", "8", "9"], "values": [0.0, 0.012, 0.0, 0.0, 0.0, 0.0, 0.0, 0.012, 0.012, 0.012, 0.0, 0.0]}, "4502005": {"labels": ["1", "10", "11", "12", "2", "3", "4", "5", "6", "7", "8", "9"], "values": [0.049, 0.309, 0.136, 0.049, 0.073, 0.146, 0.37, 0.827, 1.284, 1.309, 1.049, 0.519]}}
+<script id="series-box" type="application/json">
+{"4301005": {"1": {"min": 0.0, "q1": 0.0, "median": 0.0, "q3": 1.0, "max": 5.0}, "2": {"min": 0.0, "q1": 0.0, "median": 0.0, "q3": 1.0, "max": 4.0}, "3": {"min": 0.0, "q1": 0.0, "median": 0.0, "q3": 1.0, "max": 4.0}, "4": {"min": 0.0, "q1": 0.0, "median": 0.0, "q3": 1.0, "max": 8.0}, "5": {"min": 0.0, "q1": 0.0, "median": 0.0, "q3": 2.0, "max": 7.0}, "6": {"min": 0.0, "q1": 0.0, "median": 1.0, "q3": 3.0, "max": 9.0}, "7": {"min": 0.0, "q1": 0.0, "median": 1.0, "q3": 3.0, "max": 10.0}, "8": {"min": 0.0, "q1": 0.0, "median": 0.0, "q3": 2.0, "max": 7.0}, "9": {"min": 0.0, "q1": 0.0, "median": 0.0, "q3": 1.0, "max": 6.0}, "10": {"min": 0.0, "q1": 0.0, "median": 0.0, "q3": 1.0, "max": 4.0}, "11": {"min": 0.0, "q1": 0.0, "median": 0.0, "q3": 0.0, "max": 3.0}, "12": {"min": 0.0, "q1": 0.0, "median": 0.0, "q3": 0.0, "max": 3.0}}, "4302001": {"1": {"min": 0.0, "q1": 0.0, "median": 0.0, "q3": 0.0, "max": 0.0}, "2": {"min": 0.0, "q1": 0.0, "median": 0.0, "q3": 0.0, "max": 1.0}, "3": {"min": 0.0, "q1": 0.0, "median": 0.0, "q3": 0.0, "max": 2.0}, "4": {"min": 0.0, "q1": 0.0, "median": 0.0, "q3": 0.0, "max": 5.0}, "5": {"min": 0.0, "q1": 0.0, "median": 0.0, "q3": 0.0, "max": 7.0}, "6": {"min": 0.0, "q1": 0.0, "median": 0.0, "q3": 0.0, "max": 8.0}, "7": {"min": 0.0, "q1": 0.0, "median": 0.0, "q3": 0.0, "max": 3.0}, "8": {"min": 0.0, "q1": 0.0, "median": 0.0, "q3": 0.0, "max": 9.0}, "9": {"min": 0.0, "q1": 0.0, "median": 0.0, "q3": 0.0, "max": 2.0}, "10": {"min": 0.0, "q1": 0.0, "median": 0.0, "q3": 0.0, "max": 4.0}, "11": {"min": 0.0, "q1": 0.0, "median": 0.0, "q3": 0.0, "max": 1.0}, "12": {"min": 0.0, "q1": 0.0, "median": 0.0, "q3": 0.0, "max": 1.0}}, "4302014": {"1": {"min": 0.0, "q1": 0.0, "median": 0.0, "q3": 0.0, "max": 4.0}, "2": {"min": 0.0, "q1": 0.0, "median": 0.0, "q3": 0.0, "max": 3.0}, "3": {"min": 0.0, "q1": 0.0, "median": 0.0, "q3": 0.0, "max": 3.0}, "4": {"min": 0.0, "q1": 0.0, "median": 0.0, "q3": 0.0, "max": 3.0}, "5": {"min": 0.0, "q1": 0.0, "median": 0.0, "q3": 0.0, "max": 7.0}, "6": {"min": 0.0, "q1": 0.0, "median": 0.0, "q3": 0.0, "max": 9.0}, "7": {"min": 0.0, "q1": 0.0, "median": 0.0, "q3": 0.0, "max": 7.0}, "8": {"min": 0.0, "q1": 0.0, "median": 0.0, "q3": 0.0, "max": 4.0}, "9": {"min": 0.0, "q1": 0.0, "median": 0.0, "q3": 0.0, "max": 4.0}, "10": {"min": 0.0, "q1": 0.0, "median": 0.0, "q3": 0.0, "max": 3.0}, "11": {"min": 0.0, "q1": 0.0, "median": 0.0, "q3": 0.0, "max": 2.0}, "12": {"min": 0.0, "q1": 0.0, "median": 0.0, "q3": 0.0, "max": 4.0}}, "4306002": {"1": {"min": 0.0, "q1": 0.0, "median": 0.0, "q3": 0.0, "max": 2.0}, "2": {"min": 0.0, "q1": 0.0, "median": 0.0, "q3": 0.0, "max": 2.0}, "3": {"min": 0.0, "q1": 0.0, "median": 0.0, "q3": 0.0, "max": 2.0}, "4": {"min": 0.0, "q1": 0.0, "median": 0.0, "q3": 0.0, "max": 3.0}, "5": {"min": 0.0, "q1": 0.0, "median": 0.0, "q3": 0.0, "max": 6.0}, "6": {"min": 0.0, "q1": 0.0, "median": 0.0, "q3": 0.0, "max": 5.0}, "7": {"min": 0.0, "q1": 0.0, "median": 0.0, "q3": 1.0, "max": 5.0}, "8": {"min": 0.0, "q1": 0.0, "median": 0.0, "q3": 0.0, "max": 5.0}, "9": {"min": 0.0, "q1": 0.0, "median": 0.0, "q3": 0.0, "max": 3.0}, "10": {"min": 0.0, "q1": 0.0, "median": 0.0, "q3": 0.0, "max": 5.0}, "11": {"min": 0.0, "q1": 0.0, "median": 0.0, "q3": 0.0, "max": 1.0}, "12": {"min": 0.0, "q1": 0.0, "median": 0.0, "q3": 0.0, "max": 1.0}}, "4308001": {"1": {"min": 0.0, "q1": 0.0, "median": 0.0, "q3": 0.0, "max": 1.0}, "2": {"min": 0.0, "q1": 0.0, "median": 0.0, "q3": 0.0, "max": 1.0}, "3": {"min": 0.0, "q1": 0.0, "median": 0.0, "q3": 0.0, "max": 1.0}, "4": {"min": 0.0, "q1": 0.0, "median": 0.0, "q3": 0.0, "max": 1.0}, "5": {"min": 0.0, "q1": 0.0, "median": 0.0, "q3": 0.0, "max": 1.0}, "6": {"min": 0.0, "q1": 0.0, "median": 0.0, "q3": 0.0, "max": 1.0}, "7": {"min": 0.0, "q1": 0.0, "median": 0.0, "q3": 0.0, "max": 3.0}, "8": {"min": 0.0, "q1": 0.0, "median": 0.0, "q3": 0.0, "max": 7.0}, "9": {"min": 0.0, "q1": 0.0, "median": 0.0, "q3": 0.0, "max": 1.0}, "10": {"min": 0.0, "q1": 0.0, "median": 0.0, "q3": 0.0, "max": 4.0}, "11": {"min": 0.0, "q1": 0.0, "median": 0.0, "q3": 0.0, "max": 0.0}, "12": {"min": 0.0, "q1": 0.0, "median": 0.0, "q3": 0.0, "max": 2.0}}, "4308003": {"1": {"min": 0.0, "q1": 0.0, "median": 0.0, "q3": 0.0, "max": 1.0}, "2": {"min": 0.0, "q1": 0.0, "median": 0.0, "q3": 0.0, "max": 2.0}, "3": {"min": 0.0, "q1": 0.0, "median": 0.0, "q3": 0.0, "max": 3.0}, "4": {"min": 0.0, "q1": 0.0, "median": 0.0, "q3": 0.0, "max": 5.0}, "5": {"min": 0.0, "q1": 0.0, "median": 1.0, "q3": 2.0, "max": 6.0}, "6": {"min": 0.0, "q1": 0.0, "median": 1.0, "q3": 3.0, "max": 9.0}, "7": {"min": 0.0, "q1": 0.0, "median": 1.0, "q3": 3.0, "max": 9.0}, "8": {"min": 0.0, "q1": 0.0, "median": 1.0, "q3": 2.0, "max": 7.0}, "9": {"min": 0.0, "q1": 0.0, "median": 0.0, "q3": 1.0, "max": 5.0}, "10": {"min": 0.0, "q1": 0.0, "median": 0.0, "q3": 0.0, "max": 3.0}, "11": {"min": 0.0, "q1": 0.0, "median": 0.0, "q3": 0.0, "max": 2.0}, "12": {"min": 0.0, "q1": 0.0, "median": 0.0, "q3": 0.0, "max": 1.0}}, "4311003": {"1": {"min": 0.0, "q1": 0.0, "median": 0.0, "q3": 0.0, "max": 0.0}, "2": {"min": 0.0, "q1": 0.0, "median": 0.0, "q3": 0.0, "max": 2.0}, "3": {"min": 0.0, "q1": 0.0, "median": 0.0, "q3": 0.0, "max": 3.0}, "4": {"min": 0.0, "q1": 0.0, "median": 0.0, "q3": 0.0, "max": 6.0}, "5": {"min": 0.0, "q1": 0.0, "median": 0.0, "q3": 1.0, "max": 5.0}, "6": {"min": 0.0, "q1": 0.0, "median": 0.0, "q3": 1.0, "max": 12.0}, "7": {"min": 0.0, "q1": 0.0, "median": 0.0, "q3": 1.0, "max": 9.0}, "8": {"min": 0.0, "q1": 0.0, "median": 0.0, "q3": 1.0, "max": 5.0}, "9": {"min": 0.0, "q1": 0.0, "median": 0.0, "q3": 0.0, "max": 3.0}, "10": {"min": 0.0, "q1": 0.0, "median": 0.0, "q3": 0.0, "max": 3.0}, "11": {"min": 0.0, "q1": 0.0, "median": 0.0, "q3": 0.0, "max": 1.0}, "12": {"min": 0.0, "q1": 0.0, "median": 0.0, "q3": 0.0, "max": 0.0}}, "4311004": {"1": {"min": 0.0, "q1": 0.0, "median": 0.0, "q3": 0.0, "max": 1.0}, "2": {"min": 0.0, "q1": 0.0, "median": 0.0, "q3": 0.0, "max": 1.0}, "3": {"min": 0.0, "q1": 0.0, "median": 0.0, "q3": 0.0, "max": 4.0}, "4": {"min": 0.0, "q1": 0.0, "median": 0.0, "q3": 0.0, "max": 4.0}, "5": {"min": 0.0, "q1": 0.0, "median": 0.0, "q3": 1.0, "max": 5.0}, "6": {"min": 0.0, "q1": 0.0, "median": 0.0, "q3": 1.0, "max": 10.0}, "7": {"min": 0.0, "q1": 0.0, "median": 0.0, "q3": 1.0, "max": 9.0}, "8": {"min": 0.0, "q1": 0.0, "median": 0.0, "q3": 1.0, "max": 6.0}, "9": {"min": 0.0, "q1": 0.0, "median": 0.0, "q3": 0.0, "max": 4.0}, "10": {"min": 0.0, "q1": 0.0, "median": 0.0, "q3": 0.0, "max": 3.0}, "11": {"min": 0.0, "q1": 0.0, "median": 0.0, "q3": 0.0, "max": 1.0}, "12": {"min": 0.0, "q1": 0.0, "median": 0.0, "q3": 0.0, "max": 0.0}}, "4311005": {"1": {"min": 0.0, "q1": 0.0, "median": 0.0, "q3": 0.0, "max": 1.0}, "2": {"min": 0.0, "q1": 0.0, "median": 0.0, "q3": 0.0, "max": 1.0}, "3": {"min": 0.0, "q1": 0.0, "median": 0.0, "q3": 0.0, "max": 2.0}, "4": {"min": 0.0, "q1": 0.0, "median": 0.0, "q3": 0.0, "max": 4.0}, "5": {"min": 0.0, "q1": 0.0, "median": 0.0, "q3": 1.0, "max": 6.0}, "6": {"min": 0.0, "q1": 0.0, "median": 0.0, "q3": 1.0, "max": 9.0}, "7": {"min": 0.0, "q1": 0.0, "median": 0.0, "q3": 2.0, "max": 9.0}, "8": {"min": 0.0, "q1": 0.0, "median": 0.0, "q3": 1.0, "max": 7.0}, "9": {"min": 0.0, "q1": 0.0, "median": 0.0, "q3": 0.0, "max": 3.0}, "10": {"min": 0.0, "q1": 0.0, "median": 0.0, "q3": 0.0, "max": 3.0}, "11": {"min": 0.0, "q1": 0.0, "median": 0.0, "q3": 0.0, "max": 1.0}, "12": {"min": 0.0, "q1": 0.0, "median": 0.0, "q3": 0.0, "max": 1.0}}, "4313003": {"1": {"min": 0.0, "q1": 0.0, "median": 0.0, "q3": 0.0, "max": 0.0}, "2": {"min": 0.0, "q1": 0.0, "median": 0.0, "q3": 0.0, "max": 0.0}, "3": {"min": 0.0, "q1": 0.0, "median": 0.0, "q3": 0.0, "max": 5.0}, "4": {"min": 0.0, "q1": 0.0, "median": 0.0, "q3": 0.0, "max": 3.0}, "5": {"min": 0.0, "q1": 0.0, "median": 0.0, "q3": 0.0, "max": 6.0}, "6": {"min": 0.0, "q1": 0.0, "median": 0.0, "q3": 1.0, "max": 8.0}, "7": {"min": 0.0, "q1": 0.0, "median": 0.0, "q3": 1.0, "max": 6.0}, "8": {"min": 0.0, "q1": 0.0, "median": 0.0, "q3": 1.0, "max": 6.0}, "9": {"min": 0.0, "q1": 0.0, "median": 0.0, "q3": 0.0, "max": 3.0}, "10": {"min": 0.0, "q1": 0.0, "median": 0.0, "q3": 0.0, "max": 2.0}, "11": {"min": 0.0, "q1": 0.0, "median": 0.0, "q3": 0.0, "max": 1.0}, "12": {"min": 0.0, "q1": 0.0, "median": 0.0, "q3": 0.0, "max": 2.0}}, "4314002": {"1": {"min": 0.0, "q1": 0.0, "median": 0.0, "q3": 0.0, "max": 0.0}, "2": {"min": 0.0, "q1": 0.0, "median": 0.0, "q3": 0.0, "max": 0.0}, "3": {"min": 0.0, "q1": 0.0, "median": 0.0, "q3": 0.0, "max": 0.0}, "4": {"min": 0.0, "q1": 0.0, "median": 0.0, "q3": 0.0, "max": 3.0}, "5": {"min": 0.0, "q1": 0.0, "median": 0.0, "q3": 0.0, "max": 7.0}, "6": {"min": 0.0, "q1": 0.0, "median": 0.0, "q3": 0.0, "max": 4.0}, "7": {"min": 0.0, "q1": 0.0, "median": 0.0, "q3": 0.0, "max": 2.0}, "8": {"min": 0.0, "q1": 0.0, "median": 0.0, "q3": 0.0, "max": 2.0}, "9": {"min": 0.0, "q1": 0.0, "median": 0.0, "q3": 0.0, "max": 1.0}, "10": {"min": 0.0, "q1": 0.0, "median": 0.0, "q3": 0.0, "max": 4.0}, "11": {"min": 0.0, "q1": 0.0, "median": 0.0, "q3": 0.0, "max": 0.0}, "12": {"min": 0.0, "q1": 0.0, "median": 0.0, "q3": 0.0, "max": 2.0}}, "4314003": {"1": {"min": 0.0, "q1": 0.0, "median": 0.0, "q3": 0.0, "max": 0.0}, "2": {"min": 0.0, "q1": 0.0, "median": 0.0, "q3": 0.0, "max": 1.0}, "3": {"min": 0.0, "q1": 0.0, "median": 0.0, "q3": 0.0, "max": 3.0}, "4": {"min": 0.0, "q1": 0.0, "median": 0.0, "q3": 0.0, "max": 4.0}, "5": {"min": 0.0, "q1": 0.0, "median": 0.0, "q3": 1.0, "max": 5.0}, "6": {"min": 0.0, "q1": 0.0, "median": 1.0, "q3": 2.0, "max": 8.0}, "7": {"min": 0.0, "q1": 0.0, "median": 1.0, "q3": 2.0, "max": 8.0}, "8": {"min": 0.0, "q1": 0.0, "median": 0.0, "q3": 1.0, "max": 9.0}, "9": {"min": 0.0, "q1": 0.0, "median": 0.0, "q3": 0.0, "max": 4.0}, "10": {"min": 0.0, "q1": 0.0, "median": 0.0, "q3": 0.0, "max": 2.0}, "11": {"min": 0.0, "q1": 0.0, "median": 0.0, "q3": 0.0, "max": 1.0}, "12": {"min": 0.0, "q1": 0.0, "median": 0.0, "q3": 0.0, "max": 0.0}}, "4320001": {"1": {"min": 0.0, "q1": 0.0, "median": 0.0, "q3": 0.0, "max": 2.0}, "2": {"min": 0.0, "q1": 0.0, "median": 0.0, "q3": 0.0, "max": 0.0}, "3": {"min": 0.0, "q1": 0.0, "median": 0.0, "q3": 0.0, "max": 3.0}, "4": {"min": 0.0, "q1": 0.0, "median": 0.0, "q3": 0.0, "max": 4.0}, "5": {"min": 0.0, "q1": 0.0, "median": 0.0, "q3": 0.0, "max": 7.0}, "6": {"min": 0.0, "q1": 0.0, "median": 0.0, "q3": 0.0, "max": 6.0}, "7": {"min": 0.0, "q1": 0.0, "median": 0.0, "q3": 0.0, "max": 4.0}, "8": {"min": 0.0, "q1": 0.0, "median": 0.0, "q3": 0.0, "max": 7.0}, "9": {"min": 0.0, "q1": 0.0, "median": 0.0, "q3": 0.0, "max": 2.0}, "10": {"min": 0.0, "q1": 0.0, "median": 0.0, "q3": 0.0, "max": 3.0}, "11": {"min": 0.0, "q1": 0.0, "median": 0.0, "q3": 0.0, "max": 1.0}, "12": {"min": 0.0, "q1": 0.0, "median": 0.0, "q3": 0.0, "max": 2.0}}, "4320003": {"1": {"min": 0.0, "q1": 0.0, "median": 0.0, "q3": 0.0, "max": 1.0}, "2": {"min": 0.0, "q1": 0.0, "median": 0.0, "q3": 0.0, "max": 1.0}, "3": {"min": 0.0, "q1": 0.0, "median": 0.0, "q3": 0.0, "max": 3.0}, "4": {"min": 0.0, "q1": 0.0, "median": 0.0, "q3": 0.0, "max": 3.0}, "5": {"min": 0.0, "q1": 0.0, "median": 0.0, "q3": 1.0, "max": 6.0}, "6": {"min": 0.0, "q1": 0.0, "median": 0.0, "q3": 1.0, "max": 8.0}, "7": {"min": 0.0, "q1": 0.0, "median": 0.0, "q3": 2.0, "max": 9.0}, "8": {"min": 0.0, "q1": 0.0, "median": 0.0, "q3": 2.0, "max": 7.0}, "9": {"min": 0.0, "q1": 0.0, "median": 0.0, "q3": 1.0, "max": 4.0}, "10": {"min": 0.0, "q1": 0.0, "median": 0.0, "q3": 0.0, "max": 4.0}, "11": {"min": 0.0, "q1": 0.0, "median": 0.0, "q3": 0.0, "max": 2.0}, "12": {"min": 0.0, "q1": 0.0, "median": 0.0, "q3": 0.0, "max": 1.0}}, "4321001": {"1": {"min": 0.0, "q1": 0.0, "median": 0.0, "q3": 0.0, "max": 0.0}, "2": {"min": 0.0, "q1": 0.0, "median": 0.0, "q3": 0.0, "max": 0.0}, "3": {"min": 0.0, "q1": 0.0, "median": 0.0, "q3": 0.0, "max": 0.0}, "4": {"min": 0.0, "q1": 0.0, "median": 0.0, "q3": 0.0, "max": 2.0}, "5": {"min": 0.0, "q1": 0.0, "median": 0.0, "q3": 0.0, "max": 1.0}, "6": {"min": 0.0, "q1": 0.0, "median": 0.0, "q3": 0.0, "max": 4.0}, "7": {"min": 0.0, "q1": 0.0, "median": 0.0, "q3": 0.0, "max": 4.0}, "8": {"min": 0.0, "q1": 0.0, "median": 0.0, "q3": 0.0, "max": 3.0}, "9": {"min": 0.0, "q1": 0.0, "median": 0.0, "q3": 0.0, "max": 7.0}, "10": {"min": 0.0, "q1": 0.0, "median": 0.0, "q3": 0.0, "max": 1.0}, "11": {"min": 0.0, "q1": 0.0, "median": 0.0, "q3": 0.0, "max": 1.0}, "12": {"min": 0.0, "q1": 0.0, "median": 0.0, "q3": 0.0, "max": 0.0}}, "4331004": {"1": {"min": 0.0, "q1": 0.0, "median": 0.0, "q3": 0.0, "max": 2.0}, "2": {"min": 0.0, "q1": 0.0, "median": 0.0, "q3": 0.0, "max": 3.0}, "3": {"min": 0.0, "q1": 0.0, "median": 0.0, "q3": 0.0, "max": 1.0}, "4": {"min": 0.0, "q1": 0.0, "median": 0.0, "q3": 0.0, "max": 1.0}, "5": {"min": 0.0, "q1": 0.0, "median": 0.0, "q3": 0.0, "max": 1.0}, "6": {"min": 0.0, "q1": 0.0, "median": 0.0, "q3": 0.0, "max": 3.0}, "7": {"min": 0.0, "q1": 0.0, "median": 0.0, "q3": 0.0, "max": 5.0}, "8": {"min": 0.0, "q1": 0.0, "median": 0.0, "q3": 0.0, "max": 4.0}, "9": {"min": 0.0, "q1": 0.0, "median": 0.0, "q3": 0.0, "max": 3.0}, "10": {"min": 0.0, "q1": 0.0, "median": 0.0, "q3": 0.0, "max": 2.0}, "11": {"min": 0.0, "q1": 0.0, "median": 0.0, "q3": 0.0, "max": 0.0}, "12": {"min": 0.0, "q1": 0.0, "median": 0.0, "q3": 0.0, "max": 0.0}}, "4334001": {"1": {"min": 0.0, "q1": 0.0, "median": 0.0, "q3": 0.0, "max": 0.0}, "2": {"min": 0.0, "q1": 0.0, "median": 0.0, "q3": 0.0, "max": 0.0}, "3": {"min": 0.0, "q1": 0.0, "median": 0.0, "q3": 0.0, "max": 0.0}, "4": {"min": 0.0, "q1": 0.0, "median": 0.0, "q3": 0.0, "max": 0.0}, "5": {"min": 0.0, "q1": 0.0, "median": 0.0, "q3": 0.0, "max": 1.0}, "6": {"min": 0.0, "q1": 0.0, "median": 0.0, "q3": 0.0, "max": 2.0}, "7": {"min": 0.0, "q1": 0.0, "median": 0.0, "q3": 0.0, "max": 1.0}, "8": {"min": 0.0, "q1": 0.0, "median": 0.0, "q3": 0.0, "max": 0.0}, "9": {"min": 0.0, "q1": 0.0, "median": 0.0, "q3": 0.0, "max": 0.0}, "10": {"min": 0.0, "q1": 0.0, "median": 0.0, "q3": 0.0, "max": 1.0}, "11": {"min": 0.0, "q1": 0.0, "median": 0.0, "q3": 0.0, "max": 0.0}, "12": {"min": 0.0, "q1": 0.0, "median": 0.0, "q3": 0.0, "max": 0.0}}, "4502005": {"1": {"min": 0.0, "q1": 0.0, "median": 0.0, "q3": 0.0, "max": 2.0}, "2": {"min": 0.0, "q1": 0.0, "median": 0.0, "q3": 0.0, "max": 2.0}, "3": {"min": 0.0, "q1": 0.0, "median": 0.0, "q3": 0.0, "max": 4.0}, "4": {"min": 0.0, "q1": 0.0, "median": 0.0, "q3": 1.0, "max": 5.0}, "5": {"min": 0.0, "q1": 0.0, "median": 1.0, "q3": 2.0, "max": 7.0}, "6": {"min": 0.0, "q1": 0.0, "median": 2.0, "q3": 3.0, "max": 10.0}, "7": {"min": 0.0, "q1": 1.0, "median": 1.0, "q3": 2.0, "max": 10.0}, "8": {"min": 0.0, "q1": 0.0, "median": 1.0, "q3": 2.0, "max": 6.0}, "9": {"min": 0.0, "q1": 0.0, "median": 0.0, "q3": 1.0, "max": 5.0}, "10": {"min": 0.0, "q1": 0.0, "median": 0.0, "q3": 1.0, "max": 2.0}, "11": {"min": 0.0, "q1": 0.0, "median": 0.0, "q3": 0.0, "max": 2.0}, "12": {"min": 0.0, "q1": 0.0, "median": 0.0, "q3": 0.0, "max": 2.0}}}
 </script>
 
 <!-- Librerías -->
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-chart-boxplot@4.4.3/build/index.umd.min.js"></script>
 
 <script>
 const STATIONS = JSON.parse(document.getElementById("stations-geojson").textContent);
 const PRCP = JSON.parse(document.getElementById("series-prcp").textContent);
 const DIAS = JSON.parse(document.getElementById("series-dias").textContent);
-const EVENTOS = JSON.parse(document.getElementById("series-eventos").textContent);
+const BOX = JSON.parse(document.getElementById("series-box").textContent);
 const MES_MAP = {"1": "Ene", "2": "Feb", "3": "Mar", "4": "Abr", "5": "May", "6": "Jun", "7": "Jul", "8": "Ago", "9": "Sep", "10": "Oct", "11": "Nov", "12": "Dic"};
 
 function mapMes(labels) { return labels.map(l => MES_MAP[l] ?? l); }
 
 const map = L.map('map').setView([-30.039872222222225, -70.49292777777777], 9);
-L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-  maxZoom: 18,
-  attribution: '&copy; OpenStreetMap'
-}).addTo(map);
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 18, attribution: '&copy; OpenStreetMap' }).addTo(map);
 
 L.geoJSON(STATIONS, {
   pointToLayer: (feat, latlng) => L.marker(latlng),
@@ -405,56 +442,50 @@ L.geoJSON(STATIONS, {
     const elev = p.Elev_m != null ? `<span class="chip">${p.Elev_m} m</span>` : '';
     const cuenca = p.Cuenca ? `<span class="chip">${p.Cuenca}</span>` : '';
     const subc = p.Subcuenca ? `<span class="chip">${p.Subcuenca}</span>` : '';
+    const inicio = p.Inicio ? `<span class="chip">Inicio: ${p.Inicio}</span>` : '';
+    const fin = p.Fin ? `<span class="chip">Fin: ${p.Fin}</span>` : '';
 
     layer.bindTooltip(title);
-    layer.on('click', () => selectStation(cod, title, elev, cuenca, subc));
+    layer.on('click', () => selectStation(cod, title, elev, cuenca, subc, inicio, fin));
   }
 }).addTo(map);
 
-let chartP, chartD, chartE;
-function renderChart(el, labels, values, title, unit) {
+function renderBar(el, labels, values, unit) {
   if (el.chart) el.chart.destroy();
-  const ctx = el.getContext('2d');
-  el.chart = new Chart(ctx, {
+  el.chart = new Chart(el.getContext('2d'), {
     type: 'bar',
     data: { labels: mapMes(labels), datasets: [{ label: unit, data: values }] },
-    options: {
-      responsive: true,
-      scales: {
-        y: { beginAtZero: true, title: { display: true, text: unit } }
-      },
-      plugins: {
-        title: { display: false },
-        legend: { display: false },
-        tooltip: {
-          callbacks: { label: (ctx) => (ctx.parsed.y != null ? ctx.parsed.y.toLocaleString('es-CL') + ' ' + unit : '—') }
-        }
-      }
-    }
+    options: { responsive: true, scales: { y: { beginAtZero: true, title: { display: true, text: unit } } }, plugins: { legend: { display: false } } }
   });
 }
 
-function selectStation(codigo, nombre, elev, cuenca, subc) {
+function renderBox(el, mesToStats) {
+  if (el.chart) el.chart.destroy();
+  const labels = Object.keys(mesToStats).sort((a,b)=>Number(a)-Number(b));
+  const stats = labels.map(k => mesToStats[k]);
+  el.chart = new Chart(el.getContext('2d'), {
+    type: 'boxplot',
+    data: { labels: mapMes(labels), datasets: [{ label: 'días', data: stats }] },
+    options: { responsive: true, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, title: { display: true, text: 'días' } } } }
+  });
+}
+
+function selectStation(codigo, nombre, elev, cuenca, subc, inicio, fin) {
   const meta = document.getElementById('est-meta');
   meta.classList.remove('muted');
-  meta.innerHTML = `<b>${nombre}</b> <span class="muted">(${codigo})</span><div>${elev} ${cuenca} ${subc}</div>`;
+  meta.innerHTML = `<b>${nombre}</b> <span class="muted">(${codigo})</span><div>${elev} ${cuenca} ${subc} ${inicio} ${fin}</div>`;
 
   const pr = PRCP[codigo];
   const di = DIAS[codigo];
-  const ev = EVENTOS[codigo];
+  const bx = BOX[codigo];
 
   const elP = document.getElementById('chart-prcp');
   const elD = document.getElementById('chart-dias');
-  const elE = document.getElementById('chart-eventos');
+  const elB = document.getElementById('chart-box');
 
-  if (pr) renderChart(elP, pr.labels, pr.values, 'Precipitación media mensual', 'mm');
-  else renderChart(elP, [], [], 'Precipitación media mensual', 'mm');
-
-  if (di) renderChart(elD, di.labels, di.values, 'Promedio mensual de días con lluvia', 'días');
-  else renderChart(elD, [], [], 'Promedio mensual de días con lluvia', 'días');
-
-  if (ev) renderChart(elE, ev.labels, ev.values, 'Promedio mensual de eventos de lluvia', 'eventos');
-  else renderChart(elE, [], [], 'Promedio mensual de eventos de lluvia', 'eventos');
+  if (pr) renderBar(elP, pr.labels, pr.values, 'mm'); else renderBar(elP, [], [], 'mm');
+  if (di) renderBar(elD, di.labels, di.values, 'días'); else renderBar(elD, [], [], 'días');
+  if (bx && Object.keys(bx).length) renderBox(elB, bx); else renderBox(elB, {});
 }
 </script>
 </body>
